@@ -66,7 +66,7 @@ const fetch = async (page) => {
         let items = []
         for ( const elm of list){
             // [note] href属性を持たない要素があるため場合分け
-            if ( elm.querySelector('a').href ) items.push( elm.querySelector('a').href );
+            if ( elm.querySelector('a') && elm.querySelector('a').href ) items.push( elm.querySelector('a').href );
         }
         return items[Math.floor(Math.random() * items.length)];
     }, {});
@@ -124,7 +124,7 @@ const purchase = async ( page, url ) => {
 
     // 購入直前まで
     // ----------------------------------
-    
+
     // 今すぐ購入
     // await page.waitFor(3000);
     // await page.evaluate(() => {
@@ -132,6 +132,7 @@ const purchase = async ( page, url ) => {
     // });
 
     // カートに追加
+    await page.waitFor(5000); // [note] たまに失敗するので待機する
     await Promise.all([
         page.waitForNavigation({ waitUntil: 'load'}),
         await page.evaluate(({ }) => {
@@ -144,6 +145,15 @@ const purchase = async ( page, url ) => {
         page.waitForNavigation({ waitUntil: 'load'}),
         await page.evaluate(({ }) => {
             document.querySelector('#hlb-ptc-btn-native').click();
+        }, {})
+    ]);
+
+    // 商品みえなくする
+    await Promise.all([
+        page.waitForNavigation({ waitUntil: 'load'}),
+        await page.evaluate(({ }) => {
+            let e = document.querySelector('#revieworder');
+            e.style.display='none';
         }, {})
     ]);
 
